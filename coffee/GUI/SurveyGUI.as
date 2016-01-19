@@ -134,7 +134,7 @@
 			DoneBtn.close(e);
 			DoneBtn.removeEventListener( MouseEvent.CLICK, submit);
 			SlideCardAway();
-			//_survey.sendAnswer(_input.getInput(), _notes.getNotes());
+			_survey.recieveAnswer( _input.getInput(), _notes.getNotes());
 		}
 		
 		

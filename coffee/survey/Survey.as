@@ -1,6 +1,7 @@
 ﻿package coffee.survey {
 	
 	import coffee.utils.GUID;
+	import coffee.GUI.TextAnswer;
 	
 	//CoffeeIsForClosers is about self surveys. A survey is the highest unit of data.
 	//A survey contains a question, a vector of answers, and instructions for graphing this information.
@@ -86,11 +87,12 @@
 		}
 		
 		
-		
-		public function answer( answer:Object, notes:String):void{
-			//WIP.
+		public function recieveAnswer( answer:Object, note:String):void{
+			var answerObject:Answer = new Answer( answer, note);
+			_answers.push(answerObject); // WIP
+			trace(answerObject);
 		}
-		
+				
 		
 		// Serialize the string into JSON formatting
 		public function serialize():String{
