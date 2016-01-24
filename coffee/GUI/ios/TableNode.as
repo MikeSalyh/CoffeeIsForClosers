@@ -40,6 +40,8 @@
 			
 			// Then, add the background (after we know how tall the text is)
 			addBackground( width, totalHeight);
+			
+			myBG.addEventListener( MouseEvent.MOUSE_DOWN, getPressed);
 		}
 		
 		private function addText(text:String, y:int, width:int, format:TextFormat, x:int = 0):Number{
@@ -68,6 +70,10 @@
 			myBG = new TableNodeBG(false, nodeWidth, nodeHeight);
 			addChild(myBG);
 			setChildIndex(myBG, 0);
+		}
+		
+		private function getPressed( e:MouseEvent):void{
+			dispatchEvent( new TableEvent( TableEvent.NODE_TAPPED));
 		}
 	}
 	

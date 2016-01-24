@@ -23,7 +23,7 @@
 		}
 		
 		private function getClicked( e:MouseEvent):void{
-			dispatchEvent( new TableEvent( TableEvent.NODE_SELECTED));
+			dispatchEvent( new TableEvent( TableEvent.NODE_ACTIVATED));
 			_function(e);
 		}
 
