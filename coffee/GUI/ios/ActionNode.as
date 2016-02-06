@@ -4,6 +4,15 @@
 	public class ActionNode extends TableNode{
 
 		protected var _function:Function; // If the node has a function associated with it.
+		protected static var _enabled = true;
+
+		public static function set enabled(value:Boolean):void{
+			_enabled = value;
+		}
+
+		public static function get enabled():Boolean{
+			return _enabled;
+		}
 
 		public function ActionNode(delegate:Function=null, text:String="", data:String="", subtitle:String="", width:int = 750) {
 			// constructor code
@@ -23,10 +32,11 @@
 		}
 		
 		private function getClicked( e:MouseEvent):void{
-			dispatchEvent( new TableEvent( TableEvent.NODE_ACTIVATED));
-			_function(e);
+			if(_enabled){
+				dispatchEvent( new TableEvent( TableEvent.NODE_ACTIVATED));
+				_function(e);
+			}
 		}
-
 	}
 	
 }

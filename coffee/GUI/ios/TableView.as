@@ -16,8 +16,21 @@
 		private var _nodes:Vector.<TableNode>;
 		private var _nodeHolder:MovieClip;
 		
+		
+		// --- SCROLLING VARIABLES ----
+		
 		//private var _isDragging:Boolean = false;
 		private var _scrollBar:Shape;
+		
+		// The Y value of the mouse, when it clicks down on the nodeholder.
+		private var mouseYOnDown:Number = Number.MIN_VALUE;
+		
+		// The Y value of the nodeholder when it's clicked on.
+		private var startingNodeHolderY:Number = 0;
+		
+		
+		
+		
 		
 		public function TableView(x:Number, y:Number, width:Number, height:Number) {
 			// constructor code
@@ -27,12 +40,12 @@
 			// Put a background behind the screen
 			_bg = addChild(new MovieClip()) as MovieClip;
 			_bg.addChild(createRect(width, height));
-			_bg.addEventListener( MouseEvent.MOUSE_DOWN, handleNodeTapped);			
+			_bg.addEventListener( MouseEvent.MOUSE_DOWN, handleNodePressed);			
 			
 			_nodes = new Vector.<TableNode>();
-			_nodeHolder = addChild(new MovieClip()) as MovieClip;
 			
-			_nodeHolder.addEventListener( TableEvent.NODE_TAPPED, handleNodeTapped);
+			_nodeHolder = addChild(new MovieClip()) as MovieClip;
+			_nodeHolder.addEventListener( MouseEvent.MOUSE_DOWN, handleNodePressed);
 		}
 		
 		private function createRect(width:Number, height:Number, color:uint = 0xFFFFFF):Shape{
@@ -44,24 +57,6 @@
 			bg.graphics.lineTo(0,0);
 			bg.graphics.endFill();
 			return bg;
-		}
-		
-		// creates a scroll bar
-		private function buildScrollBar():Shape{
-			const SCROLL_WIDTH:int = 5;
-			const SCROLL_COLOR:uint = 0xB1B1B1;
-			
-			var barHeight:int;
-			if( _nodeHolder.height > _bg.height){
-				barHeight = _bg.height * (_bg.height/_nodeHolder.height);
-			} else {
-				barHeight = _bg.height;
-			}
-			
-			var b:Shape = createRect(SCROLL_WIDTH, barHeight, SCROLL_COLOR);
-			b.x = _bg.width - b.width - 3;
-			
-			return b;
 		}
 		
 		public function init():void{
@@ -81,25 +76,54 @@
 			_nodes.push(node);
 		}
 		
-		//When a node gets tapped, handle that logic.
-		private function handleNodeTapped(e:Event):void{
-			var dragWindow = _nodeHolder.height > _bg.height ? _nodeHolder.height : _bg.height;
-			_nodeHolder.startDrag(false, new Rectangle(0, -dragWindow, 0, dragWindow*2));
-			_nodeHolder.addEventListener(MouseEvent.MOUSE_UP, handleNodeReleased);
-			stage.addEventListener(MouseEvent.MOUSE_UP, handleNodeReleased);
+		
+		//When anything is tapped in the view, it could potentially be the start of a drag.
+		private function handleNodePressed(e:MouseEvent):void{
+			//Stop any auto-scrolling.
 			removeEventListener( Event.ENTER_FRAME, handlePushback);
 			
-			if( isScrollable()){
-				_scrollBar.visible = true;
-				addEventListener( Event.ENTER_FRAME, handleScrollBar);
+			//Listen for when the user's find is released.
+			stage.addEventListener(MouseEvent.MOUSE_UP, handleNodeReleased);
+			
+			//The Y value that the nodeholder was at, at the time it was clicked.
+			startingNodeHolderY = _nodeHolder.y;
+			mouseYOnDown = e.stageY;
+			
+			//Listen for drag.
+			stage.addEventListener(MouseEvent.MOUSE_MOVE, checkForDrag);
+		}
+		
+		private function checkForDrag(e:MouseEvent):void{
+			const DRAG_THRESHOLD:int = 10;
+			
+			var dY:Number =  e.stageY - mouseYOnDown;
+			if( Math.abs(dY) > DRAG_THRESHOLD){
+				//The user is trying to drag. Active dragging.
+				stage.removeEventListener(MouseEvent.MOUSE_MOVE, checkForDrag);
+				stage.addEventListener(MouseEvent.MOUSE_MOVE, handleDrag);
+				ActionNode.enabled = false; //action nodes can't fire while dragging.
+			
+				// If the nodeHolder is bigger than the table view, show a scrollbar.
+				if( isScrollable()){
+					_scrollBar.visible = true;
+					addEventListener( Event.ENTER_FRAME, handleScrollBar);
+				}
 			}
+			
+		}
+		
+		// Move the nodeHolder as its dragged around.
+		private function handleDrag(e:MouseEvent):void{
+			_nodeHolder.y = e.stageY - mouseYOnDown + startingNodeHolderY;			
 		}
 		
 		private function handleNodeReleased(e:Event):void{
-			_nodeHolder.stopDrag();
-			_nodeHolder.removeEventListener(MouseEvent.MOUSE_UP, handleNodeReleased);
 			stage.removeEventListener(MouseEvent.MOUSE_UP, handleNodeReleased);
+			stage.removeEventListener(MouseEvent.MOUSE_MOVE, handleDrag);
+			stage.removeEventListener(MouseEvent.MOUSE_MOVE, checkForDrag);
+
 			addEventListener( Event.ENTER_FRAME, handlePushback);
+			ActionNode.enabled = true;
 		}
 		
 		// This code handles when the view goes offscreen. It pushes it back onscreen.
@@ -136,6 +160,25 @@
 			}
 		}
 
+
+		// creates a scroll bar
+		private function buildScrollBar():Shape{
+			const SCROLL_WIDTH:int = 5;
+			const SCROLL_COLOR:uint = 0xB1B1B1;
+			
+			var barHeight:int;
+			if( _nodeHolder.height > _bg.height){
+				barHeight = _bg.height * (_bg.height/_nodeHolder.height);
+			} else {
+				barHeight = _bg.height;
+			}
+			
+			var b:Shape = createRect(SCROLL_WIDTH, barHeight, SCROLL_COLOR);
+			b.x = _bg.width - b.width - 3;
+			
+			return b;
+		}
+
 		private function handleScrollBar(e:Event):void{
 			const BUFFER:int = 12;
 			var bottomPos:int = -(_nodeHolder.height - _bg.height);
@@ -149,7 +192,7 @@
 		}
 		
 		
-		// TODO: Momentum scrolling (low priority). Make the scrolling play nice with actions (high priority).
+		// TODO: Momentum scrolling (low priority). 
 
 	}
 	
