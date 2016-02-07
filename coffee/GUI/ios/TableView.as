@@ -9,13 +9,15 @@
 	import fl.transitions.Tween;
 	import fl.transitions.easing.Regular;
 	import flash.display.DisplayObject;
+	import fl.transitions.TweenEvent;
+	import fl.transitions.easing.None;
 	
 	public class TableView extends MovieClip{
 
 		private var _bg:MovieClip;
 		private var _nodes:Vector.<TableNode>;
 		private var _nodeHolder:MovieClip;
-		
+		private var startX:Number;
 		
 		// --- SCROLLING VARIABLES ----
 		
@@ -38,7 +40,8 @@
 		
 		public function TableView(x:Number, y:Number, width:Number, height:Number) {
 			// constructor code
-			this.x = x;
+			startX = x;
+			this.x = startX;
 			this.y = y;
 			
 			// Put a background behind the screen
@@ -63,7 +66,7 @@
 			return bg;
 		}
 		
-		public function init():void{
+		public function init(flyIn:Boolean = true):void{
 			var nodeHeight:Number = 0;
 			for( var i:int = 0; i < _nodes.length; i++){
 				var nextNode:TableNode = _nodes[i];
@@ -74,6 +77,11 @@
 			
 			_scrollBar = addChild(buildScrollBar()) as Shape;
 			_scrollBar.visible = false;
+			
+			if(flyIn){
+				fly(x + _bg.width, x);
+			}
+			
 		}
 		
 		public function addNode(node:TableNode):void{
@@ -226,6 +234,59 @@
 		private function isScrollable():Boolean{
 			return _nodeHolder.height > _bg.height;
 		}		
+		
+		
+		// --- ENTERING & HIDING FUNCTIONS ---
+		
+		private var greyBox:MovieClip;
+		
+		
+		public function showGreyOverlay():void{
+			if(greyBox == null){
+				greyBox = new MovieClip();
+				greyBox.addChild(createRect(width, height));
+				greyBox.alpha = 0.8;
+				addChild(greyBox);
+			} else {
+				greyBox.visible = true;
+			}
+			fly(x, startX-50, 0.2);
+		}
+		
+		public function hideGreyOverlay():void{
+			if(greyBox != null){
+				greyBox.visible = false;
+			}
+			fly(startX-50, startX, 0.2);
+		}
+		
+		private var flyTween:Tween;
+		public function fly(startX:int, endX:int, seconds:Number = 0.3):void{
+			flyTween = new Tween(this, "x", fl.transitions.easing.None.easeNone, startX, endX, seconds, true);
+		}
+		
+		public function closeAndDestroy(e:Event = null):void{
+			fly(x, x + _bg.width);
+			flyTween.addEventListener(TweenEvent.MOTION_FINISH, destroy);
+		}
+		
+		
+		public function destroy(e:Event = null):void{			
+			// remove all listeners
+			_bg.removeEventListener( MouseEvent.MOUSE_DOWN, handleNodePressed);	
+			_nodeHolder.removeEventListener( MouseEvent.MOUSE_DOWN, handleNodePressed);
+			stage.removeEventListener(MouseEvent.MOUSE_UP, handleNodeReleased);
+			stage.removeEventListener(MouseEvent.MOUSE_MOVE, checkForDrag);
+			stage.removeEventListener(MouseEvent.MOUSE_MOVE, handleDrag);
+			removeEventListener( Event.ENTER_FRAME, handleScrollBar);
+			removeEventListener( Event.ENTER_FRAME, handlePushback);
+			flyTween.removeEventListener(TweenEvent.MOTION_FINISH, destroy);
+			
+			if(this.parent && this.parent.contains(this)){
+				this.parent.removeChild(this);
+			}
+			
+		}
 	}
 	
 }

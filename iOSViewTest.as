@@ -2,10 +2,12 @@
 	import flash.display.MovieClip;
 	import coffee.GUI.ios.*;
 	import flash.events.Event;
+	import flash.utils.Timer;
+	import flash.events.TimerEvent;
 	
 	public class iOSViewTest extends MovieClip{
 		
-		var myTable:TableView;
+		var myTable:TableView, subTable:TableView;
 		public function iOSViewTest() {
 			// constructor code
 			
@@ -13,7 +15,7 @@
 			
 			myTable = new TableView(0, 162, 750, 1070);
 			
-			myTable.addNode( new TableNode("This is the first node", "1.0", "This is a test of notes"));
+			/*myTable.addNode( new TableNode("This is the first node", "1.0", "This is a test of notes"));
 			myTable.addNode( new TableNode("This is the second node"));
 			myTable.addNode( new TableNode("This is the third node"));
 			myTable.addNode( new TableNode("This is the first node", "1.0", "This is a test of notes"));
@@ -30,8 +32,11 @@
 			myTable.addNode( new TableNode("This is the third node"));
 			myTable.addNode( new TableNode("This is the first node", "1.0", "This is a test of notes"));
 			myTable.addNode( new TableNode("This is the second node"));
-			myTable.addNode( new TableNode("This is the third node"));
+			myTable.addNode( new TableNode("This is the third node"));*/
 			
+			myTable.addNode( new ActionNode(pop, "Did you lift today?"));
+							
+			myTable.addNode( new ActionNode(pop, "What did you have for lunch?"));
 			
 			addChild(myTable);
 			myTable.init();
@@ -44,6 +49,27 @@
 		
 		function pop(e:Event):void{
 			trace("POP!");
+			myTable.showGreyOverlay();
+			
+			subTable = new TableView(0, 162, 750, 1070);
+			subTable.addNode( new TableNode("Yes", "1/22/2015"));
+			subTable.addNode( new TableNode("Yes", "1/23/2015", "It was a bad workout though."));
+			subTable.addNode( new TableNode("No", "1/24/2015"));
+			subTable.addNode( new TableNode("Yes", "1/25/2015"));
+			
+			addChild(subTable);
+			subTable.init();
+			
+			
+			
+			var t:Timer = new Timer(3000, 1);
+			t.addEventListener(TimerEvent.TIMER, reset);
+			t.start();
+		}
+		
+		function reset(e:TimerEvent):void{
+			myTable.hideGreyOverlay();
+			subTable.closeAndDestroy();
 		}
 
 	}
