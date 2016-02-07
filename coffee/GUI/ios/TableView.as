@@ -28,7 +28,11 @@
 		// The Y value of the nodeholder when it's clicked on.
 		private var startingNodeHolderY:Number = 0;
 		
+		// An array of the speed of the last 5 mouse moves. Used for scrolling intertia.
+		private var lastMoves:Array = new Array(0,0,0,0,0);;
 		
+		// How many px the nodeHolder will scroll with intertia when released every frame.
+		private var drift:Number;
 		
 		
 		
@@ -81,13 +85,15 @@
 		private function handleNodePressed(e:MouseEvent):void{
 			//Stop any auto-scrolling.
 			removeEventListener( Event.ENTER_FRAME, handlePushback);
-			
+			lastMoves  = new Array(0,0,0,0,0);
+
 			//Listen for when the user's find is released.
 			stage.addEventListener(MouseEvent.MOUSE_UP, handleNodeReleased);
 			
 			//The Y value that the nodeholder was at, at the time it was clicked.
 			startingNodeHolderY = _nodeHolder.y;
 			mouseYOnDown = e.stageY;
+			
 			
 			//Listen for drag.
 			stage.addEventListener(MouseEvent.MOUSE_MOVE, checkForDrag);
@@ -102,7 +108,7 @@
 				stage.removeEventListener(MouseEvent.MOUSE_MOVE, checkForDrag);
 				stage.addEventListener(MouseEvent.MOUSE_MOVE, handleDrag);
 				ActionNode.enabled = false; //action nodes can't fire while dragging.
-			
+							
 				// If the nodeHolder is bigger than the table view, show a scrollbar.
 				if( isScrollable()){
 					_scrollBar.visible = true;
@@ -114,22 +120,52 @@
 		
 		// Move the nodeHolder as its dragged around.
 		private function handleDrag(e:MouseEvent):void{
-			_nodeHolder.y = e.stageY - mouseYOnDown + startingNodeHolderY;			
+			var beforeValue:Number = _nodeHolder.y;
+			
+			// Move the nodeHolder
+			_nodeHolder.y = e.stageY - mouseYOnDown + startingNodeHolderY;		
+			
+			// And record its position, for interia when released.
+			lastMoves.unshift();
+			lastMoves.push(beforeValue - _nodeHolder.y);
 		}
 		
 		private function handleNodeReleased(e:Event):void{
 			stage.removeEventListener(MouseEvent.MOUSE_UP, handleNodeReleased);
 			stage.removeEventListener(MouseEvent.MOUSE_MOVE, handleDrag);
 			stage.removeEventListener(MouseEvent.MOUSE_MOVE, checkForDrag);
-
+			
+			// If this is scrollable, calculate intertia.
+			if( isScrollable())
+				drift = calculateIntertia();
+			
 			addEventListener( Event.ENTER_FRAME, handlePushback);
 			ActionNode.enabled = true;
 		}
 		
+		private function calculateIntertia():Number{
+			const MAX:int = 30, MIN:int = -30, MULTIPLIER:Number = 2;
+			
+			//calculate drift of release velocity.
+			var out = 0;
+			for( var i:int = 0; i < lastMoves.length; i++){
+				out += lastMoves[i];
+			}
+			out /= lastMoves.length;
+			
+			out = Math.min(out, MAX);
+			out = Math.max(out, MIN);
+			out *= MULTIPLIER;
+			
+			return out;
+		}
+		
 		// This code handles when the view goes offscreen. It pushes it back onscreen.
 		private function handlePushback( e:Event):void{
-			const PUSHBACK_SPEED:int = 4;
-			var dY:Number = 0;
+			const PUSHBACK_SPEED:int = 4, INTERTIA_DECAY:Number = 1.15;
+			var dY:Number = drift;
+			
+			drift /= INTERTIA_DECAY;
 			
 			// See how far offset the scroll menu is from where it should be. 
 			// dY is how many pixels it should move this frame.
@@ -189,11 +225,7 @@
 		
 		private function isScrollable():Boolean{
 			return _nodeHolder.height > _bg.height;
-		}
-		
-		
-		// TODO: Momentum scrolling (low priority). 
-
+		}		
 	}
 	
 }
