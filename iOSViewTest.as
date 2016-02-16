@@ -8,9 +8,12 @@
 	public class iOSViewTest extends MovieClip{
 		
 		var myTable:TableView, subTable:TableView;
+		var myHeader:HeaderBar;
+		
 		public function iOSViewTest() {
 			// constructor code
-			
+			myHeader = header;
+			myHeader.setHeader("Whatever", "Back and Forth", HeaderBar.SYMBOL_LEFT_ARROW, "", HeaderBar.SYMBOL_PLUS);
 		
 			
 			myTable = new TableView(0, 162, 750, 1070);
@@ -35,10 +38,9 @@
 			myTable.addNode( new TableNode("This is the third node"));*/
 			
 			myTable.addNode( new ActionNode(pop, "Did you lift today?"));
-							
 			myTable.addNode( new ActionNode(pop, "What did you have for lunch?"));
 			
-			addChild(myTable);
+			holder.addChild(myTable);
 			myTable.init();
 			
 			//var myNode:TableNode = new ActionNode(pop, "Did you lift today?", "Yes", "Father forgive me for these gains I'm about to recieve. Did you lift today? Father forgive me for these gains I'm about to recieve.");
@@ -57,7 +59,7 @@
 			subTable.addNode( new TableNode("No", "1/24/2015"));
 			subTable.addNode( new TableNode("Yes", "1/25/2015"));
 			
-			addChild(subTable);
+			holder.addChild(subTable);
 			subTable.init();
 			
 			
