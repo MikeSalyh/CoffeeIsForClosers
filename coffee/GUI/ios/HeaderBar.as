@@ -48,6 +48,79 @@
 			return out;
 		}
 		
+		public function showBackButton():void{
+			const BACK:String = "Back";
+
+			leftHalfBtn.addEventListener(MouseEvent.MOUSE_DOWN, handleLeftTapped);
+			leftHalfBtn.buttonMode = true;
+			
+			const PADDING:int = 10;
+			var leftEdge = -fullWidth/2 + PADDING;
+
+			// First, add the arrow
+			if(leftSymbolMC == null){
+				leftSymbolMC = new ArrowLeft();
+				leftSymbolMC.x = leftEdge;
+				leftSymbolMC.y = HEIGHT/4;
+				leftSymbolMC.mouseEnabled = false;
+				addChild(leftSymbolMC);
+			} else {
+				leftSymbolMC.visible = true;
+			}
+			leftEdge += leftSymbolMC.width + PADDING;
+			
+			// Then, add the text
+			if(leftTextField == null){
+				leftTextField = new TextField();
+				addChild(leftTextField);
+				leftTextField.x = leftEdge;
+				leftTextField.defaultTextFormat = HeaderFormat.HEADER_ACTION_LEFT;
+				leftTextField.autoSize = TextFieldAutoSize.LEFT;
+				
+				leftTextField.antiAliasType = "ADVANCED";
+				leftTextField.selectable = false;
+				leftTextField.mouseEnabled = false;
+				leftTextField.text = BACK;
+				leftEdge += leftTextField.width + PADDING;
+				leftHalfBtn.width = Math.abs(-fullWidth/2 - leftEdge);
+			} else {
+				leftTextField.visible = true;
+			}
+		}
+		
+		public function hideBackButton():void{
+			leftHalfBtn.removeEventListener(MouseEvent.MOUSE_DOWN, handleLeftTapped);
+			leftHalfBtn.buttonMode = false;
+			
+			if(leftSymbolMC != null){
+				leftSymbolMC.visible = false;
+			}
+			if(leftTextField != null){
+				leftTextField.visible = false;
+			}
+		}
+		
+		public function setTitle( value:String):void{
+			// Then the center text
+			if( headerTextField == null){
+				headerTextField = new TextField();
+				addChild(headerTextField);
+				headerTextField.antiAliasType = "ADVANCED";
+				headerTextField.defaultTextFormat = HeaderFormat.HEADER_CENTER;
+				headerTextField.selectable = false;
+				headerTextField.mouseEnabled = false;
+				headerTextField.width = 500;
+				headerTextField.x = -fullWidth/2 + 125;
+				headerTextField.wordWrap = true;
+			}
+			
+			// Add the text, then truncate it.
+			headerTextField.text = value;
+			while ( headerTextField.numLines > 1 ) 
+   				 headerTextField.text = headerTextField.text.slice(0, -4) + "...";
+		}
+		
+		/*
 		public function setHeader(headerString:String, leftString:String = "", leftSymbol:String = "NONE", rightString:String = "", rightSymbol:String = "NONE"){
 			
 			// Turn on/off buttons, depending on if they're being used.
@@ -139,19 +212,17 @@
 			leftHalfBtn.width = Math.abs(-fullWidth/2 - leftEdge);
 			rightHalfBtn.width = fullWidth/2 - rightEdge;
 			rightHalfBtn.x = fullWidth/2 - rightHalfBtn.width;
-			
-		}
+		}*/
+		
 		
 		private var leftSymbolMC:MovieClip, rightSymbolMC:MovieClip;
 		private var leftTextField:TextField, headerTextField:TextField, rightTextField:TextField;
 		
 		private function handleLeftTapped(e:MouseEvent):void{
 			dispatchEvent( new HeaderEvent(HeaderEvent.LEFT_TAPPED));
-			trace("Left pressed.");
 		}
 		private function handleRightTapped(e:MouseEvent):void{
 			dispatchEvent( new HeaderEvent(HeaderEvent.RIGHT_TAPPED));
-			trace("Right pressed.");
 		}
 		
 	}

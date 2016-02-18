@@ -33,8 +33,9 @@
 		
 		private function getClicked( e:MouseEvent):void{
 			if(_enabled){
-				dispatchEvent( new TableEvent( TableEvent.NODE_ACTIVATED));
-				_function(e);
+				var te:TableEvent = new TableEvent( TableEvent.NODE_ACTIVATED, nodeName)
+				dispatchEvent( te);
+				_function(te);
 			}
 		}
 	}

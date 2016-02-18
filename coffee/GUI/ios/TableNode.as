@@ -13,8 +13,12 @@
 		protected static const HORIZONTAL_PADDING:int = 30, VERTICAL_PADDING:int = 25, MIN_HEIGHT:int = 85;
 				
 		protected var myBG:TableNodeBG; // The background of the node
+		protected var nodeName:String;
 		
 		public function TableNode(text:String="", data:String="", subtitle:String="", width:int = 750) {
+			
+			// Save the name
+			nodeName = text;
 			
 			// First add the text
 			var nodeHeightLeft:int = VERTICAL_PADDING; // How tall the node is. It always starts with the top padding.
@@ -73,7 +77,7 @@
 		}
 		
 		private function getPressed( e:MouseEvent):void{
-			dispatchEvent( new TableEvent( TableEvent.NODE_TAPPED));
+			dispatchEvent( new TableEvent( TableEvent.NODE_TAPPED, nodeName));
 		}
 	}
 	

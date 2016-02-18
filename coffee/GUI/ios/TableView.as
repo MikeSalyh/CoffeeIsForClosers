@@ -19,6 +19,8 @@
 		private var _nodeHolder:MovieClip;
 		private var startX:Number;
 		
+		private var _name:String;
+		
 		// --- SCROLLING VARIABLES ----
 		
 		//private var _isDragging:Boolean = false;
@@ -36,23 +38,37 @@
 		// How many px the nodeHolder will scroll with intertia when released every frame.
 		private var drift:Number;
 		
+		// Placeholder. These should probably not be a fixed size.
+		private const X:int = 0, Y:int = 162, WIDTH:int = 750, HEIGHT:int = 1070;
 		
 		
-		public function TableView(x:Number, y:Number, width:Number, height:Number) {
+		public function TableView(name:String, nodes:Array) {
+			this._name = name;
+			
 			// constructor code
-			startX = x;
+			startX = X;
 			this.x = startX;
-			this.y = y;
+			this.y = Y;
 			
 			// Put a background behind the screen
 			_bg = addChild(new MovieClip()) as MovieClip;
-			_bg.addChild(createRect(width, height));
+			_bg.addChild(createRect(WIDTH, HEIGHT));
 			_bg.addEventListener( MouseEvent.MOUSE_DOWN, handleNodePressed);			
 			
 			_nodes = new Vector.<TableNode>();
+
+			if(nodes){
+				for(var i:int = 0; i < nodes.length; i++){
+					addNode( nodes[i] as TableNode);
+				}
+			}
 			
 			_nodeHolder = addChild(new MovieClip()) as MovieClip;
 			_nodeHolder.addEventListener( MouseEvent.MOUSE_DOWN, handleNodePressed);
+		}
+		
+		override public function get name():String{
+			return _name;
 		}
 		
 		private function createRect(width:Number, height:Number, color:uint = 0xFFFFFF):Shape{
