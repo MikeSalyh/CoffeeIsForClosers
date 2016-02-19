@@ -19,7 +19,7 @@
 		private var _nodeHolder:MovieClip;
 		private var startX:Number;
 		
-		private var _name:String;
+		private var _headerData:HeaderData;
 		
 		// --- SCROLLING VARIABLES ----
 		
@@ -42,8 +42,8 @@
 		private const X:int = 0, Y:int = 162, WIDTH:int = 750, HEIGHT:int = 1070;
 		
 		
-		public function TableView(name:String, nodes:Array) {
-			this._name = name;
+		public function TableView(headerData:HeaderData, nodes:Array) {
+			this._headerData = headerData;
 			
 			// constructor code
 			startX = X;
@@ -67,8 +67,8 @@
 			_nodeHolder.addEventListener( MouseEvent.MOUSE_DOWN, handleNodePressed);
 		}
 		
-		override public function get name():String{
-			return _name;
+		public function get headerData():HeaderData{
+			return _headerData;
 		}
 		
 		private function createRect(width:Number, height:Number, color:uint = 0xFFFFFF):Shape{

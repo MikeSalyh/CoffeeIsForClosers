@@ -18,6 +18,16 @@
 		private var fullWidth:int;		
 		private var leftHalfBtn:MovieClip, rightHalfBtn:MovieClip;
 		
+		// The function that's executed when the left button is clicked.
+		private var leftDelegate:Function;
+		
+		// The icon symbols
+		private var leftSymbolMC:MovieClip, rightSymbolMC:MovieClip;
+		
+		// The textfields
+		private var leftTextField:TextField, headerTextField:TextField, rightTextField:TextField;
+
+		
 		public function HeaderBar(width:int = 750) {
 			// constructor code
 			fullWidth = width;
@@ -48,11 +58,15 @@
 			return out;
 		}
 		
-		public function showBackButton():void{
-			const BACK:String = "Back";
-
-			leftHalfBtn.addEventListener(MouseEvent.MOUSE_DOWN, handleLeftTapped);
-			leftHalfBtn.buttonMode = true;
+		public function setLeftAction( data:HeaderData):void{	
+			if( data.leftDelegate != null){
+				this.leftDelegate = data.leftDelegate;
+				leftHalfBtn.addEventListener(MouseEvent.MOUSE_DOWN, handleLeftTapped);
+				leftHalfBtn.buttonMode = true;
+			} else {
+				leftHalfBtn.removeEventListener(MouseEvent.MOUSE_DOWN, handleLeftTapped);
+				leftHalfBtn.buttonMode = false;
+			}
 			
 			const PADDING:int = 10;
 			var leftEdge = -fullWidth/2 + PADDING;
@@ -64,9 +78,8 @@
 				leftSymbolMC.y = HEIGHT/4;
 				leftSymbolMC.mouseEnabled = false;
 				addChild(leftSymbolMC);
-			} else {
-				leftSymbolMC.visible = true;
 			}
+			leftSymbolMC.visible = data.useLeftIcon;
 			leftEdge += leftSymbolMC.width + PADDING;
 			
 			// Then, add the text
@@ -80,24 +93,12 @@
 				leftTextField.antiAliasType = "ADVANCED";
 				leftTextField.selectable = false;
 				leftTextField.mouseEnabled = false;
-				leftTextField.text = BACK;
-				leftEdge += leftTextField.width + PADDING;
-				leftHalfBtn.width = Math.abs(-fullWidth/2 - leftEdge);
 			} else {
 				leftTextField.visible = true;
 			}
-		}
-		
-		public function hideBackButton():void{
-			leftHalfBtn.removeEventListener(MouseEvent.MOUSE_DOWN, handleLeftTapped);
-			leftHalfBtn.buttonMode = false;
-			
-			if(leftSymbolMC != null){
-				leftSymbolMC.visible = false;
-			}
-			if(leftTextField != null){
-				leftTextField.visible = false;
-			}
+			leftTextField.text = data.leftText;
+			leftEdge += leftTextField.width + PADDING;
+			leftHalfBtn.width = Math.abs(-fullWidth/2 - leftEdge);
 		}
 		
 		public function setTitle( value:String):void{
@@ -119,6 +120,7 @@
 			while ( headerTextField.numLines > 1 ) 
    				 headerTextField.text = headerTextField.text.slice(0, -4) + "...";
 		}
+		
 		
 		/*
 		public function setHeader(headerString:String, leftString:String = "", leftSymbol:String = "NONE", rightString:String = "", rightSymbol:String = "NONE"){
@@ -214,15 +216,10 @@
 			rightHalfBtn.x = fullWidth/2 - rightHalfBtn.width;
 		}*/
 		
-		
-		private var leftSymbolMC:MovieClip, rightSymbolMC:MovieClip;
-		private var leftTextField:TextField, headerTextField:TextField, rightTextField:TextField;
-		
 		private function handleLeftTapped(e:MouseEvent):void{
-			dispatchEvent( new HeaderEvent(HeaderEvent.LEFT_TAPPED));
+			leftDelegate(new HeaderEvent(HeaderEvent.LEFT_TAPPED));
 		}
 		private function handleRightTapped(e:MouseEvent):void{
-			dispatchEvent( new HeaderEvent(HeaderEvent.RIGHT_TAPPED));
 		}
 		
 	}

@@ -17,14 +17,17 @@
 			//myHeader.setHeader("Testing...", "Back", HeaderBar.SYMBOL_LEFT_ARROW, "", HeaderBar.SYMBOL_PLUS);
 		
 			vm = new ViewManager(myHeader, holder);
-			myTable = new TableView( "My Questions", 
+			
+			var mainheader:HeaderData = new HeaderData("My Questions", "Edit", false, pop);
+			
+			myTable = new TableView( mainheader, 
 									new Array(
 										new ActionNode(openRandomData, "Did you go to the gym today?"),
 										new ActionNode(openRandomData, "What are you even doing with your life?"),
 										new ActionNode(openRandomData, "How much wood could a woodchuck chuck?")
 										)
 									);
-			vm.addTableView(myTable);
+			vm.addTableView(myTable, true);
 		}
 		
 		function pop(e:Event):void{
@@ -41,7 +44,7 @@
 				myNodes.push( new TableNode( answer, dateString));
 			}
 			
-			var t = new TableView( e.nodeName, myNodes);
+			var t = new TableView( new HeaderData(e.nodeName), myNodes);
 			vm.addTableView(t);
 		}
 		
